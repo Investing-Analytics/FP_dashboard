@@ -223,10 +223,9 @@ def main_dashboard():
             chg = float(round((sp500.history()['Close'].iloc[-1] - sp500.history()['Close'].iloc[-2])/sp500.history()['Close'].iloc[-2]*100,2))
             st.metric(label='SPY', value=sp500.info['open'], delta=f"{chg}%")
         except:
-            st.rerun()
             try:
                 chg = float(round((sp500.history()['Close'].iloc[-1] - sp500.history()['Close'].iloc[-2])/sp500.history()['Close'].iloc[-2]*100,2))
-                st.metric(label='SPY', value=sp500.info['open'], delta=f"{chg}%")
+                st.metric(label='SPY', value=sp500.info['previousClose'], delta=f"{chg}%")
             except:
                 st.warning("Technical error in fetching data. Please refresh the page and try again.")
 
@@ -236,10 +235,9 @@ def main_dashboard():
             chg = float(round((djindex.history()['Close'].iloc[-1] - djindex.history()['Close'].iloc[-2])/djindex.history()['Close'].iloc[-2]*100,2))
             st.metric(label='DJI', value=djindex.info['open'], delta=f"{chg}%")
         except:
-            st.rerun()
             try:
                 chg = float(round((djindex.history()['Close'].iloc[-1] - djindex.history()['Close'].iloc[-2])/djindex.history()['Close'].iloc[-2]*100,2))
-                st.metric(label='DJI', value=djindex.info['open'], delta=f"{chg}%")
+                st.metric(label='DJI', value=djindex.info['previousClose'], delta=f"{chg}%")
             except:
                 st.warning("Technical error in fetching data. Please refresh the page and try again.")
 
@@ -249,12 +247,11 @@ def main_dashboard():
             chg = float(round((irate.history()['Close'].iloc[-1] - irate.history()['Close'].iloc[-2])/irate.history()['Close'].iloc[-2]*100,2))
             st.metric(label='10Y Yield Rate', value=round(irate.info['open'],2), delta=f"{chg}%")
         except:
-            st.rerun()
             try:
                 chg = float(round((irate.history()['Close'].iloc[-1] - irate.history()['Close'].iloc[-2])/irate.history()['Close'].iloc[-2]*100,2))
                 st.metric(label='10Y Yield Rate', value=round(irate.info['previousClose'],2), delta=f"{chg}%")
             except:
-                st.warning("Technical error in fetching data. Please refresh the page and try again.")    
+                st.warning("Technical error in fetching data. Please refresh the page and try again.") 
 
     # Display the filtered table
     table,scatter = st.columns(2,gap='medium')
