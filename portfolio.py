@@ -303,7 +303,7 @@ def main_dashboard():
                 with titl:
                     st.header("Allocations")
                 with bttn:
-                    st.download_button("Download as CSV",data = row_df.to_csv(),file_name=f'Returns_{selected_points[0]['y']}% Portfolio.csv',mime='text/csv')
+                    st.download_button("Download as CSV",data = row_df.to_csv(),file_name=f'Returns_{selected_points[0]["y"]}% Portfolio.csv',mime='text/csv')
                 st.bar_chart(row_df,y_label='Allocations in %')
 
 if __name__ == "__main__":
