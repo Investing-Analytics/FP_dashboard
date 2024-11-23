@@ -252,7 +252,7 @@ def main_dashboard():
             st.rerun()
             try:
                 chg = float(round((irate.history()['Close'].iloc[-1] - irate.history()['Close'].iloc[-2])/irate.history()['Close'].iloc[-2]*100,2))
-                st.metric(label='10Y Yield Rate', value=round(irate.info['open'],2), delta=f"{chg}%")
+                st.metric(label='10Y Yield Rate', value=round(irate.info['previousClose'],2), delta=f"{chg}%")
             except:
                 st.warning("Technical error in fetching data. Please refresh the page and try again.")    
 
