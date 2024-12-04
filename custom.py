@@ -336,4 +336,6 @@ def build_custom():
                     with dld:
                         st.download_button("Download as CSV",data = row_df.to_csv(),file_name=f"Returns_{selected_points[0]['y']}% Portfolio.csv",mime='text/csv')
                     st.write("Expected Return: ",selected_points[0]['y'],'\nVolatility: ',selected_points[0]['x'])
-                    st.bar_chart(row_df,y_label='Allocations in %',stack=False)
+                    horizontal = True if row_df.shape[0]>15 else False
+                    st.bar_chart(row_df,x_label='Allocations in %',stack=False,horizontal=horizontal
+                                 )
