@@ -1,3 +1,4 @@
+import numpy as np
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -14,7 +15,6 @@ def main():
         st.set_page_config(layout="wide")
     except:
         temp = None
-    # st.session_state.page = st.sidebar.selectbox("Navigate to", ["Dashboard","My Portfolio", "Guide Me"],index=0)
     if 'page' not in st.session_state:
         st.session_state.page = "Dashboard"
     st.sidebar.button("Dashboard",key="db")
@@ -81,15 +81,26 @@ def get_plotly_theme_settings():
 
 # @st.cache_data
 def generate_scatter_plot(df,allcs):
-    df = df[df['Total Return']>=0]
+    if df['Total Return'].min() < 0:
+        st.warning("You selection includes stocks with negative expected returns, those will not be processed into optimization")
     try:
-        ret, vol, wgts = mpt.generate_portfolio(df,allcs/100)
+        if df.shape[0] < 15:
+            history = pd.read_csv('bayesian_forecast.csv')
+            df = df[df['Ticker'].isin(history['Ticker'])]
+            cov = mpt.covariance_fc(history,df)
+            wgts = np.array([1/df.shape[0]]*df.shape[0])
+            exp_returns = df['Total Return'].to_numpy()
+            ret = mpt.portfolio_return(wgts,exp_returns)
+            vol = mpt.portfolio_volatility(wgts,cov)
+            vol = np.sqrt(vol) if ret/vol < 0.4 else vol
+            wgts = pd.DataFrame(wgts,index=df['Ticker']).T
+            ret,vol = [ret],[vol]
+        else:
+            ret, vol, wgts = mpt.generate_portfolio(df,allcs/100)
     except Exception as e:
         st.error(f"Something didn't go right please contact support with the error message! \n Error: {e}")
         st.stop()
-    frontier = pd.DataFrame([ret,vol])
-    frontier_chart = frontier.T
-    frontier_chart.columns = ['Expected Returns','Volatility']
+    frontier_chart = pd.DataFrame({'Expected Returns':ret,'Volatility':vol})
     if frontier_chart['Volatility'].min()>=40:
         frontier_chart['Volatility'] /= 10
     frontier_chart = frontier_chart[frontier_chart['Volatility']<=150].round(2)
