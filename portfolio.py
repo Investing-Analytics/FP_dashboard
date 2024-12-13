@@ -160,24 +160,26 @@ def main_dashboard():
     if sharp_slider:
         sharp_values = st.sidebar.slider(' ', df['Sharpe Ratio'].min(),df['Sharpe Ratio'].max(),value=[0.4,5.0])
 
-    pe_slider = st.sidebar.checkbox('Current PE Ratio', key='pe',help="PE Ratio: Indicates how much investors are willing to pay per dollar of earnings, helping to assess whether a stock is over or undervalued.")
-    if pe_slider:
-        pe_values = st.sidebar.slider(' ', df['PE Ratio'].min(),df['PE Ratio'].max(),value=[6.0,80.0])
-
     div_slider = st.sidebar.checkbox('Dividend Yield in %', key='dy',help="Dividend Yield: Shows the annual dividend as a percentage of the stock’s current price, highlighting the income potential relative to the investment cost.")
     if div_slider:
         div_values = st.sidebar.slider(' ', df['DividendYield'].min(),df['DividendYield'].max(),value=[0.0,10.0])
     else:
         div_values = [0.0,10.0]
         
+    pe_slider = st.sidebar.checkbox('Current PE Ratio', key='pe',help="PE Ratio: Indicates how much investors are willing to pay per dollar of earnings, helping to assess whether a stock is over or undervalued.")
+    if pe_slider:
+        min_pe = st.sidebar.number_input("Min PE Ratio",min_value=df['PE Ratio'].min(),max_value=df['PE Ratio'].max(),value=0.0,key='minpe')
+        max_pe = st.sidebar.number_input("Max PE Ratio",min_value=df['PE Ratio'].min(),max_value=df['PE Ratio'].max(),value=40.0,key='maxpe')
+        # pe_values = st.sidebar.slider(' ', df['PE Ratio'].min(),df['PE Ratio'].max(),value=[6.0,80.0])
+
     market_slider = st.sidebar.checkbox('Market Cap', key='mc',help="Represents a company’s total value in the market, determined by multiplying share price by the number of outstanding shares.")
     if market_slider:
         # mar_cap_values = st.sidebar.slider('Market Cap in $Bn', 0.004, 3287.0,value=[0.01, 10.0])
-        minm, maxm = st.sidebar.columns(2)
-        with minm:
-            min_market = st.sidebar.number_input("Min Market Cap in $Mn ", min_value=0, max_value=4000000, value=10,key='mincap')
-        with maxm:
-            max_market = st.sidebar.number_input("Max Market Cap in $Bn", min_value=0, max_value=4000, value=10,key='maxcap')
+        # minm, maxm = st.sidebar.columns(2)
+        # with minm:
+        min_market = st.sidebar.number_input("Min Market Cap in $Mn ", min_value=int(df['Market Cap. (USD)'].min()/1e6), max_value=int(df['Market Cap. (USD)'].max()/1e6), value=10,key='mincap')
+        # with maxm:
+        max_market = st.sidebar.number_input("Max Market Cap in $Bn", min_value=int(df['Market Cap. (USD)'].min()/1e9), max_value=int(df['Market Cap. (USD)'].max()/1e9), value=10,key='maxcap')
 
     mavg = st.sidebar.checkbox('Price above 200 day MA', key='mav',help="Indicates whether the current price of the stock is above 200 day moviing average.")
 
@@ -201,7 +203,7 @@ def main_dashboard():
         df = df[df['Sharpe Ratio'].between(sharp_values[0],sharp_values[1])]
 
     if pe_slider:
-        df = df[df['PE Ratio'].between(pe_values[0],pe_values[1])]
+        df = df[df['PE Ratio'].between(min_pe,max_pe)]
 
     # if div_slider:
     df = df[df['DividendYield'].between(div_values[0],div_values[1])]
@@ -292,7 +294,7 @@ def main_dashboard():
     # If filters change, scatter plot needs to update
     if 'scatter_plot' not in st.session_state:
         if st.session_state.port_create:
-            st.session_state.scatter_plot, st.session_state.ret, st.session_state.vol, st.session_state.wgts = generate_scatter_plot(df,allcs)
+            st.session_state.scatter_plot, st.session_state.ret, st.session_state.vol, st.session_state.wgts = generate_scatter_plot(df[df['Total Return']>=0],allcs)
 
     # Display scatter plot and handle click events
     if 'scatter_plot' in st.session_state:
