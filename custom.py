@@ -186,6 +186,9 @@ def build_custom():
                         maxlim = maxall + 5 - (maxall % 5)
                         st.session_state.assets_data['Minimum Allocation'] = 0.0
                         st.session_state.assets_data['Maximum Allocation'] = float(maxlim)
+                        returns = [list(df[df['Ticker']==x]['Total Return'])[0] for x in st.session_state.assets_data['Asset']]
+                        st.session_state.assets_data['Total Return'] = returns
+
 
                         st.session_state.assets_data = st.data_editor(st.session_state.assets_data,
                                             column_config={
@@ -253,6 +256,8 @@ def build_custom():
                 maxlim = maxall + 5 - (maxall % 5)
                 st.session_state.assets_data['Minimum Allocation'] = 0
                 st.session_state.assets_data['Maximum Allocation'] = maxlim
+                returns = [list(df[df['Ticker']==x]['Total Return'])[0] for x in st.session_state.assets_data['Asset']]
+                st.session_state.assets_data['Total Return'] = returns
 
                 st.session_state.assets_data = st.data_editor(st.session_state.assets_data,
                                                     column_config={
