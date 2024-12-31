@@ -3,7 +3,7 @@ import numpy as np
 from sklearn.impute import KNNImputer
 from scipy.optimize import minimize
 
-history = pd.read_csv('bayesian_forecast.csv')
+history = pd.read_csv('pctchg2yr.csv')
 def covariance_fc(history,df):
     mat = history[history['Ticker'].isin(df['Ticker'])]
     mat = mat.T

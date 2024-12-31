@@ -8,6 +8,7 @@ import mpt
 import custom
 import yfinance as yf
 import guideme
+# import analysis
 import time
 
 def main():
@@ -50,7 +51,7 @@ def main():
 
     navigate(st.session_state.page)
     
-def navigate(page):
+def navigate(page,data=None):
     theme = True
     title_color = 'White' if theme else 'Black'
     if page == "Dashboard":
@@ -63,6 +64,9 @@ def navigate(page):
     elif page == "Guide Me":
         st.markdown(f"<h1 style='text-align: center; color: {title_color};'>Guide Me</h1>", unsafe_allow_html=True)
         guideme.how_to_page()
+    # elif page == "Analyze":
+    #     st.markdown(f"<h1 style='text-align: center; color: {title_color};'>Analyze Portfolio</h1>", unsafe_allow_html=True)
+    #     analysis.land(data)
 
 
 def portfolio_button():
@@ -137,10 +141,11 @@ def generate_scatter_plot(df,allcs):
 
 def main_dashboard():
     # Load the CSV data
-    csv_file = 'stock_data.csv'
+    csv_file = 'stock_data_Dec24.csv'
     indices = pd.read_csv('indices.csv')
+    history = pd.read_csv('pctchg2yr.csv')
     df = pd.read_csv(csv_file).drop_duplicates()
-
+    df = df[df.Ticker.isin(history.Ticker)]
     # if st.sidebar.button("Guide Me"):
     #     mp.go_to_how_to_page()  # Button to switch to How-to page
     #     st.rerun()
@@ -154,6 +159,7 @@ def main_dashboard():
 
     returns_slider = st.sidebar.checkbox("Forecasted Total Returns in %", key='retn',help="Total Returns: The projected return on an investment, combining both capital gains and dividends, reflecting the overall profitability expectation.")
     if returns_slider:
+        # fc_option = st.sidebar.selectbox("Select the type of forecast",("Yahoo Forecast","Fundamental Forecast","Multifactor Forecast"))
         tot_return_values = st.sidebar.slider(' ', df['Total Return'].min(), 300.0,value=[8.0,100.0])
 
     sharp_slider = st.sidebar.checkbox('Sharpe Ratio', key='sr',help="Sharpe Ratio: Measures how well a stock’s returns compensate for its risk, with higher values indicating better risk-adjusted performance.")
@@ -211,8 +217,8 @@ def main_dashboard():
     if market_slider:
         df = df[df['Market Cap. (USD)'].between(min_market*1000000,max_market*1000000000)]
 
-    if etf_selections and not 'All' in etf_selections:
-        df = df[df['ETF'].isin(etf_selections)]
+    # if etf_selections and not 'All' in etf_selections:
+    #     df = df[df['ETF'].isin(etf_selections)]
 
     if idx_selection:
         tckr = []
@@ -222,8 +228,8 @@ def main_dashboard():
         fticks = list(set(df['Ticker']) and set(tckr))
         df = df[df['Ticker'].isin(fticks)]
 
-    if mavg:
-        df = df[df['Price Above 200 MAV']=='YES']
+    # if mavg:
+    #     df = df[df['Price Above 200 MAV']=='YES']
 
     # with table:
     st.sidebar.button('Generate portfolio', on_click=portfolio_button,key='port')
@@ -312,12 +318,18 @@ def main_dashboard():
             row_df = pd.DataFrame(row_data)
             row_df = row_df[row_data > 0.01]*100
             with allocs_chart:
-                titl,bttn = st.columns(2,gap='large')
+                titl,bttn,analysis = st.columns(3,gap='large')
                 with titl:
                     st.header("Allocations")
                 with bttn:
                     st.download_button("Download as CSV",data = row_df.to_csv(),file_name=f'Returns_{selected_points[0]["y"]}% Portfolio.csv',mime='text/csv')
+                # with analysis:
+                #     st.button("Analyze Portfolio",key="explore")
+                #     if "explore" in st.session_state and st.session_state.explore:
+                #         st.session_state.page = "Analyze Portfolio"
+                #         navigate(st.session_state.page, row_df)
                 st.bar_chart(row_df,y_label='Allocations in %')
+
 
 if __name__ == "__main__":
     main()
