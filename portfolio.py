@@ -89,7 +89,7 @@ def generate_scatter_plot(df,allcs):
         st.warning("You selection includes stocks with negative expected returns, those will not be processed into optimization")
     try:
         if df.shape[0] < 15:
-            history = pd.read_csv('bayesian_forecast.csv')
+            history = pd.read_csv('pctchg2yr.csv')
             df = df[df['Ticker'].isin(history['Ticker'])]
             cov = mpt.covariance_fc(history,df)
             wgts = np.array([1/df.shape[0]]*df.shape[0])
@@ -143,6 +143,7 @@ def main_dashboard():
     # Load the CSV data
     csv_file = 'stock_data_Dec24.csv'
     indices = pd.read_csv('indices.csv')
+    modelfc = pd.read_csv('model forecasts.csv')
     history = pd.read_csv('pctchg2yr.csv')
     df = pd.read_csv(csv_file).drop_duplicates()
     df = df[df.Ticker.isin(history.Ticker)]
@@ -159,7 +160,7 @@ def main_dashboard():
 
     returns_slider = st.sidebar.checkbox("Forecasted Total Returns in %", key='retn',help="Total Returns: The projected return on an investment, combining both capital gains and dividends, reflecting the overall profitability expectation.")
     if returns_slider:
-        # fc_option = st.sidebar.selectbox("Select the type of forecast",("Yahoo Forecast","Fundamental Forecast","Multifactor Forecast"))
+        fc_option = st.sidebar.selectbox("Select the type of forecast",("Analyst Forecast","EPS based Forecast","SPS based Forecast","FCFPS based Forecast","Composite Forecast"))
         tot_return_values = st.sidebar.slider(' ', df['Total Return'].min(), 300.0,value=[8.0,100.0])
 
     sharp_slider = st.sidebar.checkbox('Sharpe Ratio', key='sr',help="Sharpe Ratio: Measures how well a stock’s returns compensate for its risk, with higher values indicating better risk-adjusted performance.")
@@ -203,6 +204,8 @@ def main_dashboard():
         df = df[df['IV'].between(iv_values[0],iv_values[1])]
 
     if returns_slider:
+        fc_col = {"Analyst Forecast":"Total Return","EPS based Forecast":"Total Return (EPS)","SPS based Forecast":"Total Return (SPS)","FCFPS based Forecast":"Total Return (FCFPS)","Composite Forecast":"Total Return (Composite)"}
+        df['Total Return'] = modelfc[modelfc.Ticker.isin(df.Ticker)][fc_col[fc_option]]
         df = df[df['Total Return'].between(tot_return_values[0],tot_return_values[1])]
 
     if sharp_slider:
@@ -217,8 +220,8 @@ def main_dashboard():
     if market_slider:
         df = df[df['Market Cap. (USD)'].between(min_market*1000000,max_market*1000000000)]
 
-    # if etf_selections and not 'All' in etf_selections:
-    #     df = df[df['ETF'].isin(etf_selections)]
+    if etf_selections and not 'All' in etf_selections:
+        df = df[df['ETF'].isin(etf_selections)]
 
     if idx_selection:
         tckr = []
@@ -279,7 +282,7 @@ def main_dashboard():
         st.header("Information Table")
         st.write(f"Total Stocks: {len(df)}")
         st.write(f"Total Stocks with Positive Total Returns: {len(df[df['Total Return']>=0])}")
-        st.dataframe(df.iloc[:,:-5], hide_index=True)
+        st.dataframe(df, hide_index=True)
     # st.dataframe(df)
 
     with scatter:
