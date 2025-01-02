@@ -161,7 +161,7 @@ def main_dashboard():
     returns_slider = st.sidebar.checkbox("Forecasted Total Returns in %", key='retn',help="Total Returns: The projected return on an investment, combining both capital gains and dividends, reflecting the overall profitability expectation.")
     if returns_slider:
         fc_option = st.sidebar.selectbox("Select the type of forecast",("Analyst Forecast","EPS based Forecast","SPS based Forecast","FCFPS based Forecast","Composite Forecast"))
-        tot_return_values = st.sidebar.slider(' ', 0, 300.0,value=[8.0,100.0])
+        tot_return_values = st.sidebar.slider(' ', 0.0, 300.0,value=[8.0,100.0])
 
     sharp_slider = st.sidebar.checkbox('Sharpe Ratio', key='sr',help="Sharpe Ratio: Measures how well a stock’s returns compensate for its risk, with higher values indicating better risk-adjusted performance.")
     if sharp_slider:
